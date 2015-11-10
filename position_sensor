@@ -1,0 +1,77 @@
+/*
+  position sensor. This code returns the position of the carriage using an optical encoder
+  and an encoder strip. 
+
+ This example code is in the public domain.
+ */
+float cutoff = .15; // the voltage line which determines whether the sensor is on black or white
+int color = 0; // initial setting of the position
+long lastdebouncetime = 0;
+long debouncedelay = 50;
+int lastval = 0; // variable used to help with debounce
+int valswitch = 0; // used to help debounce
+int pos = 1; // the initial position of the carriage
+int maxpos = 5; // the number of needles in the bed. once pos reaches maxpos, it counts down again
+int dir = 1; // the direction of the carriage, assuming it changes only at end of bed
+// the setup routine runs once when you press reset:
+void setup() {
+  // initialize serial communication at 9600 bits per second:
+  Serial.begin(9600);
+}
+
+// the loop routine runs over and over again forever:
+void loop() {
+  // read the input on analog pin 0:
+  int sensorValue = analogRead(A0);
+  // Convert the analog reading (which goes from 0 - 1023) to a voltage (0 - 5V):
+  float voltage = sensorValue * (5.0 / 1023.0);
+//  Serial.println(voltage); // for debugging
+  if (voltage <= cutoff)
+  {
+    color = 0 ;  // the it returns zero when ur not on a mark
+  }
+  else if (voltage > cutoff)
+  {
+    color = 1;   // returns 1 when you're on a needle
+  }
+  if (color != lastval)
+  {
+    lastdebouncetime = millis();
+  }
+ if ((millis() - lastdebouncetime) > debouncedelay) {
+    // whatever the reading is at, it's been there for longer
+    // than the debounce delay, so take it as the actual curren
+    if(valswitch != color){
+//      Serial.println(color); // tells if you're on a needle or not
+      valswitch = color;
+      if (valswitch == 1)
+      {
+        pos += 1;
+        Serial.println(pos);
+      }
+      if (pos == maxpos)
+      {
+        pos = 1;
+
+        dir *=-1;
+        if (dir == 1)
+        {
+        Serial.println("up");
+        Serial.println(pos);
+        }
+        else
+        {
+          Serial.println("down");
+          Serial.println(pos);
+        }
+        
+      }
+      
+    }
+
+  }
+
+    lastval = color;
+  // print out the value you read:
+//  Serial.println(color);
+}
