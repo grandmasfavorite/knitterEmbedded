@@ -3,7 +3,7 @@
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 Adafruit_DCMotor *Motor = AFMS.getMotor(1);
 int motorSpeed = 254;
-int cutoff = 30;
+int cutoff = 150;
 
 //serial input (one byte at a time)
 byte byteRead;
@@ -117,48 +117,9 @@ void check_serial(){
   }
 }
 
-void wait_for_design(){
-  while(length == 0)
-  {
-    check_serial();
-  }
-}
-
-void knit_right(){
-  dir = 1;
-  Motor->setSpeed(motorSpeed);
-  Motor->run(BACKWARD);
-  while (current_pos != width)
-  {
-    sensor_pos();
-  } //Wait to reach position 
-  Motor->run(RELEASE);
-}
-
-void knit_left(){
-  dir = -1;
-  Motor->setSpeed(motorSpeed);
-  Motor->run(FORWARD);
-  while (current_pos != 0)
-  {
-    sensor_pos();
-  } //Wait to reach position 
-  Motor->run(RELEASE);
-}
-
 void loop(){
-  wait_for_design();
-  Serial.println('Starting_Scarf');
-  while (current_row < length)
-  {
-    if (current_row %2 ==0)
-    {
-      knit_right();
-    }
-    else
-    {
-      knit_left();
-    }
-    current_row += 1;
-  }
+  Motor->setSpeed(motorSpeed);
+  Motor->run(FORWARD);//Left
+  //Motor->run(BACKWARD);//Right
+  sensor_pos();
 }
