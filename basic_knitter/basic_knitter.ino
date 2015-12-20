@@ -2,6 +2,7 @@
 #include <Adafruit_MotorShield.h>
 Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
 Adafruit_DCMotor *Motor = AFMS.getMotor(1);
+int limitSwitch = A1;
 int motorSpeed = 254;
 int cutoff = 30;
 
@@ -22,7 +23,7 @@ boolean knitting;
 int current_pos = 0;
 int current_row = 0;
 int current_color;
-int dir = 1; // the direction of the carriage
+int dir = -1; // the direction of the carriage
 int sensorValue;
 
 void setup() {                
@@ -117,6 +118,7 @@ void check_serial(){
   }
 }
 
+
 void wait_for_design(){
   while(length == 0)
   {
@@ -127,7 +129,7 @@ void wait_for_design(){
 void knit_right(){
   dir = 1;
   Motor->setSpeed(motorSpeed);
-  Motor->run(BACKWARD);
+  Motor->run(FORWARD);
   while (current_pos != width)
   {
     sensor_pos();
@@ -138,7 +140,7 @@ void knit_right(){
 void knit_left(){
   dir = -1;
   Motor->setSpeed(motorSpeed);
-  Motor->run(FORWARD);
+  Motor->run(BACKWARD);
   while (current_pos != 0)
   {
     sensor_pos();
@@ -146,18 +148,33 @@ void knit_left(){
   Motor->run(RELEASE);
 }
 
+void go_home(){
+  Serial.println("Homing.");
+  Motor->setSpeed(motorSpeed);
+  Motor->run(BACKWARD);
+  int limitValue = analogRead(limitSwitch);
+  while (limitValue > 100)
+  {
+    limitValue = analogRead(limitSwitch);
+  }
+  Motor->run(RELEASE);
+  Serial.println("Homing Complete.");
+}
+
 void loop(){
   wait_for_design();
   Serial.println('Starting_Scarf');
+  go_home()
+  delay(5)
   while (current_row < length)
   {
     if (current_row %2 ==0)
     {
-      knit_right();
+      knit_left();
     }
     else
     {
-      knit_left();
+      knit_right();
     }
     current_row += 1;
   }

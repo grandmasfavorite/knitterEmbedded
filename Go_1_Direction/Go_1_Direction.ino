@@ -119,7 +119,7 @@ void check_serial(){
 
 void loop(){
   Motor->setSpeed(motorSpeed);
-  Motor->run(FORWARD);//Left
-  //Motor->run(BACKWARD);//Right
+  Motor->run(FORWARD);//Right
+  //Motor->run(BACKWARD);//Left
   sensor_pos();
 }
